@@ -11,7 +11,7 @@ int atom(int ao_index)
 
 int indexOf(std::vector<std::string> my_list, std::string element)
 {
-    for(size_t i=0;i<my_list.size();i++)
+    for(size_t i=0;i<sizeof(my_list);i++)
     {
         if(element==my_list[i])
         {
@@ -24,7 +24,7 @@ int indexOf(std::vector<std::string> my_list, std::string element)
 bool list_contains(std::vector<std::string>  my_list, std::string element)
 {
     bool found = 0;
-    for(size_t i=0;i<my_list.size();i++)
+    for(size_t i=0;i<sizeof(my_list);i++)
     {
         if(element==my_list[i])
         {
@@ -65,10 +65,10 @@ Eigen::MatrixXd fast_fock_matrix(Eigen::MatrixXd hamiltonian, Eigen::MatrixXd in
 {
     std::vector<std::string> orbital_types ={"s","px", "py", "pz"};
     std::vector<std::string>  p_orbitals = {"px", "py", "pz"};
-    size_t ndof = hamiltonian.rows();
+    size_t ndof = hamiltonian.size();
     Eigen::MatrixXd fock_mat = hamiltonian;
     //Hartree potential term
-    for(size_t p=0;p<ndof;p++)
+    for(int p=0;p<ndof;p++)
     {
         for(auto orb_q: orbital_types)
         {
@@ -77,7 +77,7 @@ Eigen::MatrixXd fast_fock_matrix(Eigen::MatrixXd hamiltonian, Eigen::MatrixXd in
             {
                 int t = ao_index(atom(p), orb_t,orbital_types); // p & t on same atom
                 float chi_pqt = chi_on_atom(orb(p,orbital_types), orb_q, orb_t,p_orbitals,dipole);
-                for(size_t r=0;r<ndof;r++)
+                for(int r=0;r<ndof;r++)
                 {
                     for(auto orb_s : orbital_types)
                     {
@@ -94,7 +94,7 @@ Eigen::MatrixXd fast_fock_matrix(Eigen::MatrixXd hamiltonian, Eigen::MatrixXd in
         }   
     }
     //Fock exchange term
-    for(size_t p=0;p<ndof;p++)
+    for(int p=0;p<ndof;p++)
     {
         for(auto orb_s: orbital_types)
         {
@@ -103,7 +103,7 @@ Eigen::MatrixXd fast_fock_matrix(Eigen::MatrixXd hamiltonian, Eigen::MatrixXd in
             {
                 int u = ao_index(atom(p), orb_u,orbital_types); //p & u on same atom
                 float chi_psu = chi_on_atom(orb(p,orbital_types), orb_s, orb_u,p_orbitals,dipole);
-                for(size_t q=0; q<ndof; q++)
+                for(int q=0; q<ndof; q++)
                 {
                     for(auto orb_r : orbital_types)
                     {

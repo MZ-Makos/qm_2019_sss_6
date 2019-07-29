@@ -1,5 +1,4 @@
 import numpy as np
-import fock_fast as ff
 
 class scf():
     def __init__(self,hamiltonian_matrix,interaction_matrix,density_matrix,chi_tensor,energy_ion,ionic_charge, orbitals_per_atom):
@@ -49,8 +48,7 @@ class scf():
     """
         old_density_matrix = self.density_matrix.copy()
         for iteration in range(max_scf_iterations):
-            fock_matrix = self.fast_fock_matrix(self.hamiltonian_matrix, self.interaction_matrix,
-        self.density_matrix)
+            fock_matrix = self.calculate_fock_matrix(self.hamiltonian_matrix, self.interaction_matrix, old_density_matrix, self.chi_tensor)
             density_matrix = self.calculate_density_matrix(fock_matrix)
             error_norm = np.linalg.norm( old_density_matrix - density_matrix)
             if error_norm < convergence_tolerance:
@@ -103,11 +101,6 @@ class scf():
         occupied_matrix = orbital_matrix[:, :num_occ]
         density_matrix = occupied_matrix @ occupied_matrix.T
         return density_matrix
-    
-    def fast_fock_matrix(self,hamiltonian_matrix,interaction_matrix,density_matrix):
-        dipole = 2.781629275106456
-        return ff.fast_fock_matrix(hamiltonian_matrix,interaction_matrix,density_matrix,dipole)
-
 
     def calculate_fock_matrix(self,hamiltonian_matrix,interaction_matrix,density_matrix, chi_tensor):
         '''Returns the Fock matrix defined by the input Hamiltonian, interaction, & density matrices.
@@ -140,10 +133,8 @@ class scf():
         return fock_matrix
 
     def initialize(self):
-        #self.fock_matrix = self.calculate_fock_matrix(self.hamiltonian_matrix, self.interaction_matrix,
-        #self.density_matrix, self.chi_tensor)
-        self.fock_matrix = self.fast_fock_matrix(self.hamiltonian_matrix, self.interaction_matrix,
-        self.density_matrix)
+        self.fock_matrix = self.calculate_fock_matrix(self.hamiltonian_matrix, self.interaction_matrix,
+        self.density_matrix, self.chi_tensor)
         self.density_matrix = self.calculate_density_matrix(self.fock_matrix)
 
     def kernel(self):
