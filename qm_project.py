@@ -1,5 +1,33 @@
 import numpy as np
 
+def atom(ao_index):
+    '''Returns the atom index part of an atomic orbital index.'''
+    return ao_index // orbitals_per_atom
+
+def orb(ao_index):
+    '''Returns the orbital type of an atomic orbital index.'''
+    orb_index = ao_index % orbitals_per_atom
+    return orbital_types[orb_index]
+
+def ao_index(atom_p, orb_p):
+    '''Returns the atomic orbital index for a given atom index and orbital type.
+    
+    Parameters
+    ----------
+    atom_p: int
+        Index of atom
+    orb_p: str
+        orbital type
+
+    Returns
+    -------
+    p: int
+        atomic orbital
+    '''
+    p = atom_p * orbitals_per_atom
+    p += orbital_types.index(orb_p)
+    return p
+
 def hopping_energy(o1, o2, r12, model_parameters):
     '''Returns the hopping matrix element for a pair of orbitals of type o1 & o2 separated by a vector r12.
 
@@ -132,7 +160,7 @@ def calculate_potential_vector(atomic_coordinates, model_parameters):
     Potential Energy Vector of the molecule : ndarray
         An ndarray containing the direction and the magnitude of the potential energy of the molecule.
         """
-    ndof = len(atomic_coordinates) * orbitals_per_atom
+        ndof = len(atomic_coordinates) * orbitals_per_atom
     potential_vector = np.zeros(ndof)
     for p in range(ndof):
         potential_vector[p] = 0.0
@@ -545,3 +573,81 @@ if __name__ == "__main__":
     print(energy_mp2)
 
 
+class scf(self):
+    def __init__ self(self,hamiltonian_matrix,interaciton_matrix,density_matrix,chi_tensor):
+        self.hamiltonian_matrix=hamiltonian_matrix
+        self.interaction_matrix=interaction_matrix
+        self.density_matrix= density_matrix
+        self.chi_tensor = chi_tensor
+    def scf_cycle(hamiltonian_matrix, interaction_matrix, density_matrix,
+                chi_tensor, max_scf_iterations = 100,
+                mixing_fraction = 0.25, convergence_tolerance = 1e-4):
+        """Returns converged density & Fock matrices defined by the input Hamiltonian, interaction, & density matrices.
+        
+        Parameters
+        ----------
+        Initial Hamiltonian : np.array
+            Defines the initial orbital energy and phase space. 
+        Interaction Matrix: ndarray
+            Defines the initial interaction between different atoms.
+        Density Matrix: ndarray
+            Defines the electron density on atoms.  
+
+        Returns
+        -------
+        If SCF converges, then returns modified density matrix and modified fock matrix.
+    """
+        old_density_matrix = density_matrix.copy()
+        for iteration in range(max_scf_iterations):
+            new_fock_matrix = calculate_fock_matrix(hamiltonian_matrix, interaction_matrix, old_density_matrix, chi_tensor)
+            new_density_matrix = calculate_density_matrix(new_fock_matrix)
+
+            error_norm = np.linalg.norm( old_density_matrix - new_density_matrix )
+            if error_norm < convergence_tolerance:
+                return new_density_matrix, new_fock_matrix
+
+            old_density_matrix = (mixing_fraction * new_density_matrix
+                                + (1.0 - mixing_fraction) * old_density_matrix)
+        print("WARNING: SCF cycle didn't converge")
+        return new_density_matrix, new_fock_matrix
+    def calculate_energy_ion(atomic_coordinates):
+    def calculate_energy_scf(hamiltonian_matrix, fock_matrix, density_matrix):
+        '''Returns the Hartree-Fock total energy defined by the input Hamiltonian, Fock, & density matrices.
+
+        Inputs
+        ------
+        hamiltonian_matrix : np.array
+
+        fock_matrix : np.array
+
+        density_matrix : np.array
+
+
+        Output
+        ------
+        energy_scf : float
+            Hartree-Fock total energy
+
+        '''
+        energy_scf = np.einsum('pq,pq', hamiltonian_matrix + fock_matrix,
+                            density_matrix)
+        return energy_scf
+    def calculate_density_matrix(fock_matrix):
+    def calculate_fock_matrix(hamiltonian_matrix, interaction_matrix, density_matrix, chi_tensor):
+    def initialize():
+        self.fock_matrix=self.calculate_fock_matrix(self.hamiltonian_matrix,self.interaction_matrix,self.density_matrix,self.chi_tensor)
+        self.density_matrix=self.calculate_density_matrix(self.fock_matrix)
+    def kernel():
+        self.initialize()
+        self.scf_cycle()
+
+
+class MP2(self):
+    def __init__ self(self,scf):
+    def transform_interaction_tensor(occupied_matrix, virtual_matrix, interaction_matrix, chi_tensor):
+    def partition_orbitals(fock_matrix):
+    def calculate_energy_mp2(fock_matrix, interaction_matrix, chi_tensor):
+    def kernel():
+
+scf_obj=scf(...)
+scf_obj.kernel()
